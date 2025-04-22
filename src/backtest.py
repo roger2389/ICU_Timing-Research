@@ -9,7 +9,7 @@ from typing import Dict, List
 import empyrical as ep
 import backtrader as bt
 import pandas as pd
-
+import numpy as np
 from .bt_strategy import CrossOverStrategy
 
 
@@ -104,26 +104,43 @@ def get_backtest(
 
 
 def runstrat(periods: Dict, dataset: pd.DataFrame, method: str) -> float:
-    result: List = get_backtest(dataset, periods["N"])
-    analyzers = result[0].analyzers
+    try:
+        result: List = get_backtest(dataset, periods["N"])
+        strat = result[0]
+        analyzers = strat.analyzers
 
-    def _get_rets() -> pd.Series:
-        return pd.Series(analyzers._TimeReturn.get_analysis())
+        # 加入交易次數判斷
+        trade_stats = analyzers._TradeAnalyzer.get_analysis()
+        closed = trade_stats.get("total", {}).get("closed", 0)
+        if closed < 1:
+            print(f"[略過] 無平倉交易，參數：{periods}")
+            return -np.inf
 
-    if method == "ann":
-        return analyzers._Returns.get_analysis()["rnorm100"]
+        # 取報酬時間序列
+        def _get_rets() -> pd.Series:
+            rets = pd.Series(analyzers._TimeReturn.get_analysis())
+            return rets if not rets.empty else pd.Series([0])
 
-    elif method == "sharpe":
-        return analyzers._SharpeRatio_A.get_analysis()
+        if method == "ann":
+            value = analyzers._Returns.get_analysis().get("rnorm100", -np.inf)
+        elif method == "sharpe":
+            value = analyzers._SharpeRatio_A.get_analysis()
+        elif method == "dw":
+            value = analyzers._DrawDown.get_analysis().get("max", {}).get("drawdown", -np.inf)
+        elif method == "calmar":
+            value = ep.calmar_ratio(_get_rets())
+        elif method == "cum":
+            value = ep.cum_returns(_get_rets()).iloc[-1]
+        else:
+            raise ValueError("method must be in ['ann','sharpe','dw','calmar','cum']")
 
-    elif method == "dw":
-        return analyzers._DrawDown.get_analysis()["max"]["drawdown"]
+        # 若為 NaN 或 inf，視為失敗
+        if value is None or np.isnan(value) or np.isinf(value):
+            print(f"[警告] 回傳值無效：{value}，參數：{periods}")
+            return -np.inf
 
-    elif method == "calmar":
-        return ep.calmar_ratio(_get_rets())
+        return value
 
-    elif method == "cum":
-        return ep.cum_returns(_get_rets()).iloc[-1]
-
-    else:
-        raise ValueError("method must be in ['ann','sharpe','dw','calmar','cum']")
+    except Exception as e:
+        print(f"[錯誤] 策略執行失敗，參數：{periods}，錯誤：{e}")
+        return -np.inf
