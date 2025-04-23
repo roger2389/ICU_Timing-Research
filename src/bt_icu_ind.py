@@ -1,10 +1,4 @@
-'''
-Author: hugo2046 shen.lan123@gmail.com
-Date: 2023-04-20 14:39:06
-LastEditors: hugo2046 shen.lan123@gmail.com
-LastEditTime: 2023-04-20 14:52:38
-Description: 自定义ICU均线
-'''
+
 import backtrader as bt
 import numpy as np
 from scipy import stats

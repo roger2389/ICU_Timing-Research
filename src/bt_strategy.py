@@ -1,10 +1,3 @@
-'''
-Author: hugo2046 shen.lan123@gmail.com
-Date: 2023-04-20 14:43:52
-LastEditors: hugo2046 shen.lan123@gmail.com
-LastEditTime: 2023-04-20 14:52:52
-Description: 双均线策略
-'''
 
 import backtrader as bt
 

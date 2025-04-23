@@ -1,10 +1,4 @@
-"""
-Author: hugo2046 shen.lan123@gmail.com
-Date: 2023-04-20 14:43:52
-LastEditors: hugo2046 shen.lan123@gmail.com
-LastEditTime: 2023-04-20 14:46:20
-Description: 回测模块
-"""
+
 from typing import Dict, List
 import empyrical as ep
 import backtrader as bt

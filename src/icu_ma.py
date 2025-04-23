@@ -1,13 +1,3 @@
-'''
-Author: hugo2046 shen.lan123@gmail.com
-Date: 2023-04-20 14:33:27
-LastEditors: hugo2046 shen.lan123@gmail.com
-LastEditTime: 2023-04-20 14:52:49
-Description: 
-
-siegelslope_ma:重复中位数(RM)下的稳健回归
-calc_icu_ma:ICU均线
-'''
 from typing import Union
 
 import numpy as np
